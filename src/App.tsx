@@ -18,7 +18,8 @@ import { ShopBackModal } from './components/ShopBackModal';
 import { SINGAPORE_LOCATIONS, computeDistanceKm } from './data/singaporeLocations';
 import { LocationPoint, NearbyDriver, PriceAlert, RideHistoryItem, RideOption, RideProvider, VehicleCategory } from './types/ride';
 import { calculateRideOptions, generateNearbyDrivers } from './services/rideSimulator';
-import { Bell, Sparkles, Navigation, Layers, ShieldCheck, Check, Clock, TrendingDown } from 'lucide-react';
+import { fetchLtaTaxiAvailability } from './services/ltaService';
+import { Bell, Sparkles, Navigation, Layers, ShieldCheck, Check, Clock, TrendingDown, Database, Server } from 'lucide-react';
 
 export default function App() {
   // Navigation State
@@ -44,6 +45,7 @@ export default function App() {
   const [feedbackTrip, setFeedbackTrip] = useState<RideHistoryItem | null>(null);
   const [showShopBackModal, setShowShopBackModal] = useState<boolean>(false);
   const [notificationBanner, setNotificationBanner] = useState<string | null>(null);
+  const [ltaApiStatus, setLtaApiStatus] = useState<{ isLive: boolean; status: string; totalAvailable: number; nearbyCount: number } | null>(null);
 
   // Seeded History (Miro Activity: Transaction history log for re-ordering)
   const [tripHistory, setTripHistory] = useState<RideHistoryItem[]>([
@@ -118,7 +120,7 @@ export default function App() {
   ]);
 
   // Update rates logic
-  const refreshRates = useCallback(() => {
+  const refreshRates = useCallback(async () => {
     setIsRefreshing(true);
     const options = calculateRideOptions({
       origin,
@@ -131,6 +133,36 @@ export default function App() {
     setRideOptions(options);
     setNearbyDrivers(drivers);
     setLastUpdated(new Date());
+
+    // Query serverless LTA DataMall endpoint
+    try {
+      const ltaData = await fetchLtaTaxiAvailability(origin.lat, origin.lng);
+      if (ltaData) {
+        setLtaApiStatus({
+          isLive: ltaData.isLive,
+          status: ltaData.status,
+          totalAvailable: ltaData.totalAvailableTaxis,
+          nearbyCount: ltaData.nearbyTaxisCount,
+        });
+
+        // If live or mock taxis returned, update the LTA Taxi option's availability count
+        setRideOptions((prev) =>
+          prev.map((opt) =>
+            opt.provider === 'taxi'
+              ? {
+                  ...opt,
+                  driverCountNearby: ltaData.nearbyTaxisCount || opt.driverCountNearby,
+                  driverNote: ltaData.isLive
+                    ? 'Live DataMall Feed (2,400+ SG Taxis)'
+                    : 'Serverless Endpoint Ready (Key Pending)',
+                }
+              : opt
+          )
+        );
+      }
+    } catch {
+      // Keep existing simulation
+    }
 
     setTimeout(() => {
       setIsRefreshing(false);
@@ -269,8 +301,10 @@ export default function App() {
 
               {/* Live Status indicator */}
               <div className="flex items-center gap-2 text-xs bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 shrink-0 self-start sm:self-auto">
-                <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                <span className="text-slate-200 font-medium">LTA Traffic Sync: Active</span>
+                <span className={`w-2 h-2 rounded-full ${ltaApiStatus?.isLive ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+                <span className="text-slate-200 font-medium">
+                  {ltaApiStatus?.isLive ? 'LTA DataMall: Live' : 'LTA Serverless /api/taxiavailability'}
+                </span>
                 <span className="text-slate-400 font-mono text-[11px]">
                   {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                 </span>
