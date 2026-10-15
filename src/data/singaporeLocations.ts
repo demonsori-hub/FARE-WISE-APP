@@ -2,6 +2,15 @@ import { LocationPoint } from '../types/ride';
 
 export const SINGAPORE_LOCATIONS: LocationPoint[] = [
   {
+    id: 'smu_178903',
+    name: 'SMU School of Economics (Postal 178903)',
+    address: '90 Stamford Road, Singapore 178903',
+    area: 'Downtown / Stamford (OneMap)',
+    lat: 1.2979,
+    lng: 103.8489,
+    defaultErp: 2.0,
+  },
+  {
     id: 'changi_t3',
     name: 'Changi Airport Terminal 3',
     address: '65 Airport Boulevard, Singapore 819663',

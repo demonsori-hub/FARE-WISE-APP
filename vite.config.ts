@@ -21,6 +21,11 @@ function serverlessApiPlugin(): Plugin {
             await handler(req, res);
             return;
           }
+          if (parsedUrl.pathname === '/api/onemap') {
+            const { default: handler } = await server.ssrLoadModule('/api/onemap.ts');
+            await handler(req, res);
+            return;
+          }
         } catch (err: any) {
           res.statusCode = 500;
           res.setHeader('Content-Type', 'application/json');

@@ -10,6 +10,7 @@ export interface HealthResponse {
   environment: string;
   endpoints: {
     taxiavailability: string;
+    onemap: string;
     health: string;
   };
   ltaDatamallConfigured: boolean;
@@ -36,6 +37,7 @@ export default async function handler(req: any, res: any) {
     environment: process.env.NODE_ENV || 'development',
     endpoints: {
       taxiavailability: '/api/taxiavailability',
+      onemap: '/api/onemap',
       health: '/api/health',
     },
     ltaDatamallConfigured: Boolean(apiKey && apiKey.trim().length > 0),
