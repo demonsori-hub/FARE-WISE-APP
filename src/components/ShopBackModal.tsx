@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { X, Sparkles, ExternalLink, ShieldCheck, Wallet, ArrowUpRight, Gift } from 'lucide-react';
 
 interface ShopBackModalProps {
@@ -10,6 +10,8 @@ export const ShopBackModal: React.FC<ShopBackModalProps> = ({
   onClose,
   accumulatedCashback,
 }) => {
+  const [withdrawn, setWithdrawn] = useState(false);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
       <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
@@ -47,16 +49,23 @@ export const ShopBackModal: React.FC<ShopBackModalProps> = ({
                 ${(14.80 + accumulatedCashback).toFixed(2)}
               </span>
               <button
-                onClick={() => alert('Simulated PayNow transfer initiated! Funds will arrive in 1-2 business days.')}
-                className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-lg text-xs transition-colors cursor-pointer flex items-center gap-1"
+                onClick={() => setWithdrawn(true)}
+                disabled={withdrawn}
+                className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-60 text-white font-semibold rounded-lg text-xs transition-colors cursor-pointer flex items-center gap-1"
               >
                 <Wallet className="w-3.5 h-3.5" />
-                <span>Withdraw</span>
+                <span>{withdrawn ? 'Transferred' : 'Withdraw'}</span>
               </button>
             </div>
-            <p className="text-[11px] text-slate-400 mt-2">
-              Automatically credited after every verified Grab, Gojek, or TADA ride.
-            </p>
+            {withdrawn ? (
+              <p className="text-[11px] text-emerald-300 mt-2 font-medium bg-emerald-950/60 p-2 rounded-lg border border-emerald-500/30">
+                ✓ Simulated PayNow transfer initiated! Funds will arrive in 1-2 business days.
+              </p>
+            ) : (
+              <p className="text-[11px] text-slate-400 mt-2">
+                Automatically credited after every verified Grab, Gojek, or TADA ride.
+              </p>
+            )}
           </div>
 
           {/* Partner Rates Matrix */}
