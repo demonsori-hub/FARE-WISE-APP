@@ -1,0 +1,6 @@
+{
+  "name": "FARE WISE",
+  "description": "Real-time ride-hailing and taxi comparison tracking live fares, pickup ETAs, and LTA DataMall Taxi Availability across Grab, Gojek, TADA, and Singapore Taxis.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
